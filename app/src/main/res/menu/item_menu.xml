@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+
+    <item
+        android:title="MapType"
+        android:id="@+id/item_maptype"/>
+
+<!--    <item-->
+<!--        android:title="LiteMode"-->
+<!--        android:id="@+id/item_liteMode"/>-->
+<!--    <item-->
+<!--        android:title="MapStyle"-->
+<!--        android:id="@+id/item_mapstyle">-->
+
+<!--        <menu>-->
+<!--            <item-->
+<!--                android:title="Light"-->
+<!--                android:id="@+id/item_mapstyle_light"/>-->
+<!--            <item-->
+<!--                android:title="Dark"-->
+<!--                android:id="@+id/item_mapstyle_dark"/>-->
+<!--        </menu>-->
+
+<!--    </item>-->
+<!--    <item-->
+<!--        android:title="TileOverlay"-->
+<!--        android:id="@+id/item_tileoverlay"/>-->
+<!--    <item-->
+<!--        android:title="StreetView"-->
+<!--        android:id="@+id/item_StreetView"/>-->
+<!--    <item-->
+<!--        android:title="DisplayTrack"-->
+<!--        android:id="@+id/item_displaytrack"/>-->
+<!--    <item-->
+<!--        android:title="LocationNoMap"-->
+<!--        android:id="@+id/item_location_no_map"/>-->
+<!--    <item-->
+<!--        android:title="LocationWithMap"-->
+<!--        android:id="@+id/item_location_with_map"/>-->
+</menu>
