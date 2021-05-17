@@ -1,13 +1,12 @@
 package com.example.googlemapdemoall
 
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
 import android.widget.PopupMenu
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.example.googlemapdemoall.litemode.LiteModeActivity1
+import com.example.googlemapdemoall.litemode.LiteModeActivity
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PointOfInterest
@@ -64,7 +63,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
                 true
             }
             R.id.item_liteMode -> {
-                startActivity<LiteModeActivity1>()
+                startActivity<LiteModeActivity>()
                 true
             }
         else -> false
