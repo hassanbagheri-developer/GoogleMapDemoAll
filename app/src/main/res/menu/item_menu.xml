@@ -7,9 +7,9 @@
         android:title="MapType"
         android:id="@+id/item_maptype"/>
 
-<!--    <item-->
-<!--        android:title="LiteMode"-->
-<!--        android:id="@+id/item_liteMode"/>-->
+    <item
+        android:title="LiteMode"
+        android:id="@+id/item_liteMode"/>
 <!--    <item-->
 <!--        android:title="MapStyle"-->
 <!--        android:id="@+id/item_mapstyle">-->

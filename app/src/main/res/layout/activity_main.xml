@@ -29,6 +29,8 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <fragment
+        xmlns:map="http://schemas.android.com/apk/res-auto"
+        map:mapType="satellite"
         android:id="@+id/main_map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"

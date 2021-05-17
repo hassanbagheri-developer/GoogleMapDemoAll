@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:map="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+
+
+
+
+    <com.google.android.gms.maps.MapView
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        map:liteMode="true"
+        map:mapType="none"
+        android:id="@+id/mapview"/>
+
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Sample1"
+        android:gravity="center"
+        android:textSize="18sp"
+        android:id="@+id/txt_title"
+        android:textColor="#000"
+        android:background="#C5C5C5"
+        android:textStyle="bold"/>
+
+
+
+
+</LinearLayout>
