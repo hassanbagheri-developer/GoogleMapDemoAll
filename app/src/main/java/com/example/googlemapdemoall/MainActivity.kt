@@ -1,20 +1,27 @@
 package com.example.googlemapdemoall
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
 import android.widget.PopupMenu
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import com.example.googlemapdemoall.litemode.LiteModeActivity
 import com.google.android.gms.maps.*
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.PointOfInterest
+import com.google.android.gms.maps.GoogleMap.*
+import com.google.android.gms.maps.model.*
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.toast
 
-class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuItemClickListener, GoogleMap.OnPoiClickListener {
+class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuItemClickListener,
+    OnPoiClickListener,
+    OnInfoWindowClickListener {
 
     private lateinit var googleMap: GoogleMap
 
@@ -25,7 +32,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
 
 
         val mapFragment = supportFragmentManager
-                .findFragmentById(R.id.main_map) as SupportMapFragment?
+            .findFragmentById(R.id.main_map) as SupportMapFragment?
 
         mapFragment?.getMapAsync(this)
 
@@ -34,8 +41,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
         }
 
 
+
     }
 
+    //    region config Google Map
     override fun onMapReady(p0: GoogleMap) {
         googleMap = p0
 
@@ -44,18 +53,110 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
 
 //        باز شدن نقشه در لوکیشن خاص
         val latLng = LatLng(35.689927429417054, 51.311302185058594)
+        googleMap.addMarker(MarkerOptions().title("فرودگاه مهرآباد").position(latLng))
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15F))
-
 
 //        config baraye map
         val option = GoogleMapOptions()
-        option.mapType(2)
+        option.mapType(1)
+
+        // Contoroler
         googleMap.mapType = option.mapType
 
+        googleMap.uiSettings.isZoomControlsEnabled = true
+        googleMap.uiSettings.isCompassEnabled = true
+        googleMap.uiSettings.isMapToolbarEnabled = false
 
-        toast("نقشه با موقعیت بارگذاری شد.")
+//        googleMap.uiSettings.isScrollGesturesEnabled = false
+//        googleMap.uiSettings.isTiltGesturesEnabled = false
+//        googleMap.uiSettings.isRotateGesturesEnabled = false
+
+
+        handlePermission()
+
+//        Click in icon location
+
+        googleMap.setOnMyLocationButtonClickListener(OnMyLocationButtonClickListener {
+            Toast.makeText(this, "Clicked!", Toast.LENGTH_SHORT).show()
+            false
+        })
+
+        googleMap.setOnMyLocationClickListener(OnMyLocationClickListener {
+            Toast.makeText(this, "i found your location :)", Toast.LENGTH_SHORT)
+                .show()
+        })
+
+
+        //        کشیدن خط
+        setPolyLine()
+
+
+
+    }
+//endregion
+
+
+
+    //region handlePermission
+    private fun handlePermission() {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            Log.e("hassan","true")
+            googleMap.setMyLocationEnabled(true)
+        } else {
+            Log.e("hassan","false")
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                Constant.LOCATION_PERMISSION
+            )
+            toast("for use location map you need this permission!")
+        }
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
+        if (requestCode == Constant.LOCATION_PERMISSION) {
+            if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                handlePermission()
+            } else {
+                finish()
+            }
+        }
+    }
+
+    //endregion
+
+
+    //region addmarkert
+    private fun addmarket(name: String, postion: LatLng) {
+        val market = MarkerOptions()
+//        market.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN))
+        market.icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_bus))
+        market.position(postion).title(name).snippet("این لوکیشن خاصی است")
+        googleMap.clear()
+        googleMap.setOnInfoWindowClickListener(this)
+        googleMap.addMarker(market)
+    }
+
+    override fun onInfoWindowClick(marker: Marker) {
+        toast(marker.title)
+    }
+
+    //endregion
+
+
+    //region handel menu
+    fun menuup() {
+        val popup = PopupMenu(this, main_menu)
+        popup.menuInflater.inflate(R.menu.item_menu, popup.menu)
+        popup.setOnMenuItemClickListener(this)
+        popup.show()
+    }
+
+    // handel items munu
     override fun onMenuItemClick(item: MenuItem?): Boolean {
         return when (item?.itemId) {
             R.id.item_maptype -> {
@@ -66,61 +167,120 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
                 startActivity<LiteModeActivity>()
                 true
             }
-        else -> false
+            else -> false
+        }
+
+
+    }
+
+    // for handel item maptype in mune
+    private fun showMaptype() {
+        val values =
+            arrayOf("Normal", "Hybrid", "Satelite", "Terrain", "None")
+        val builder =
+            AlertDialog.Builder(this)
+        builder.setTitle("Select Map type:")
+        builder.setSingleChoiceItems(
+            values, -1
+        ) { dialog, item ->
+            when (item) {
+                0 -> {
+                    googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL)
+                    dialog.dismiss()
+                }
+                1 -> {
+                    googleMap.setMapType(4)
+                    dialog.dismiss()
+                }
+                2 -> {
+                    googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE)
+                    dialog.dismiss()
+                }
+                3 -> {
+                    googleMap.setMapType(3)
+                    dialog.dismiss()
+                }
+                4 -> {
+                    googleMap.setMapType(0)
+                    dialog.dismiss()
+                }
+            }
+        }
+
+        builder.show()
+
+    }
+
+//    endregion
+
+    private fun setPolyLine() {
+        googleMap.addMarker(MarkerOptions().position(LatLng(35.686136831341635, 51.410141587257385)))
+        googleMap.addMarker(MarkerOptions().position(LatLng(33.48376889821861, 48.35339426994324)))
+
+        //    gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(35.686136831341635,51.410141587257385),16f));
+        val polyline: Polyline = googleMap.addPolyline(
+            PolylineOptions()
+                .add(
+                    LatLng(35.686136831341635, 51.410141587257385),
+                    LatLng(33.48376889821861, 48.35339426994324)
+                )
+                .width(5f)
+                .clickable(true)
+                .color(Color.RED)
+        )
+
+
+        //     polyline.remove();
+    }
+
+    private fun setPolygon() {
+        val polygon: Polygon = googleMap.addPolygon(
+            PolygonOptions()
+                .add(
+                    LatLng(35.684993353356006, 51.41000412404537),
+                    LatLng(35.6820178918213, 51.40936810523271),
+                    LatLng(35.68120851222863, 51.417416073381894),
+                    LatLng(35.684242826388406, 51.418069861829274)
+                )
+                .strokeColor(Color.RED)
+                .clickable(true)
+                .fillColor(Color.BLUE)
+        )
+
+        ///  polygon.remove();
+    }
+
+    private fun setCircle() {
+        val circle: Circle = googleMap.addCircle(
+            CircleOptions()
+                .center(LatLng(35.68929649250615, 51.409634314477444))
+                .clickable(true)
+                .radius(100.0)
+                .strokeColor(Color.BLACK)
+                .fillColor(Color.TRANSPARENT)
+        )
+        val circle1: Circle = googleMap.addCircle(
+            CircleOptions()
+                .center(LatLng(35.688273966543555, 51.41964733600617))
+                .clickable(true)
+                .radius(100.0)
+                .strokeColor(Color.BLACK)
+                .fillColor(Color.TRANSPARENT)
+        )
     }
 
 
-}
+    override fun onPoiClick(p0 : PointOfInterest) {
+        Log.e("hassan", "onPoiClick: " + p0.latLng)
+        Log.e("hassan", "onPoiClick: " + p0.name)
+        Log.e("hassan", "onPoiClick: " + p0.placeId)
 
-private fun showMaptype() {
-    val values =
-            arrayOf("Normal", "Hybrid", "Satelite", "Terrain", "None")
-    val builder =
-            AlertDialog.Builder(this)
-    builder.setTitle("Select Map type:")
-    builder.setSingleChoiceItems(
-            values, -1
-    ) { dialog, item ->
-        when (item) {
-            0 -> {
-                googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL)
-                dialog.dismiss()
-            }
-            1 -> {
-                googleMap.setMapType(4)
-                dialog.dismiss()
-            }
-            2 -> {
-                googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE)
-                dialog.dismiss()
-            }
-            3 -> {
-                googleMap.setMapType(3)
-                dialog.dismiss()
-            }
-            4 -> {
-                googleMap.setMapType(0)
-                dialog.dismiss()
-            }
+
+        googleMap.setOnMapClickListener {
+            Log.e("hassan", it.toString())
+            addmarket(p0.name, it)
         }
     }
 
-    builder.show()
-
-}
-
-fun menuup() {
-    val popup = PopupMenu(this, main_menu)
-    popup.menuInflater.inflate(R.menu.item_menu, popup.menu)
-    popup.setOnMenuItemClickListener(this)
-    popup.show()
-}
-
-
-override fun onPoiClick(p0: PointOfInterest) {
-    Log.e("hassan", "onPoiClick: " + p0.latLng)
-    Log.e("hassan", "onPoiClick: " + p0.name)
-    Log.e("hassan", "onPoiClick: " + p0.placeId)
-}
 
 }
