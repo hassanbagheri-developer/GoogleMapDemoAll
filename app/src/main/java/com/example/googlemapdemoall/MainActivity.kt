@@ -112,7 +112,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
             val lng: Double = googleMap.getCameraPosition().target.longitude
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom( LatLng(lat,lng),20f));
             googleMap.clear();
-                markerAnimation(LatLng(lat,lng));
+            markerAnimation(LatLng(lat,lng));
 
             //     setDirectaion(prev,new LatLng(lat,lng));
             //     prev=new LatLng(lat,lng);
@@ -127,7 +127,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
         val firstLocation = LatLng(35.684993353356006, 51.41000412404537)
         val toLocation = LatLng(latLng.latitude, latLng.longitude)
         val marker: Marker = googleMap.addMarker(MarkerOptions().position(firstLocation))
-        MarkerAnimation.animateMarkerToGB(marker, toLocation, LatLngInterpolator.Spherical())
+        val markerAnimation = MarkerAnimation()
+        markerAnimation.animateMarkerToGB(marker, toLocation, LatLngInterpolator.Spherical())
     }
 
 
