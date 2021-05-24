@@ -12,6 +12,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.example.googlemapdemoall.litemode.LiteModeActivity
+import com.example.googlemapdemoall.util.LatLngInterpolator
+import com.example.googlemapdemoall.util.MarkerAnimation
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.GoogleMap.*
 import com.google.android.gms.maps.model.*
@@ -87,14 +89,46 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
         })
 
 
-        //        کشیدن خط
+        // region استفاده از شکل ها
         setPolyLine()
+        setPolygon()
+        setCircle()
+        //endregion
 
+        setGroundOverLay()
+
+        getCamera()
+
+        googleMap.setOnMapLongClickListener{ latLng ->
+             getCamera()
+            // goLocByLatLng(latLng);
+            //  goLocByName();
+            // DialogTrack(latLng);
+//            DistanceTo(latLng)
+        }
+
+        googleMap.setOnCameraMoveListener {
+            val lat: Double = googleMap.getCameraPosition().target.latitude
+            val lng: Double = googleMap.getCameraPosition().target.longitude
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom( LatLng(lat,lng),20f));
+            googleMap.clear();
+                markerAnimation(LatLng(lat,lng));
+
+            //     setDirectaion(prev,new LatLng(lat,lng));
+            //     prev=new LatLng(lat,lng);
+        }
 
 
     }
-//endregion
+    //endregion
 
+
+    private fun markerAnimation(latLng: LatLng) {
+        val firstLocation = LatLng(35.684993353356006, 51.41000412404537)
+        val toLocation = LatLng(latLng.latitude, latLng.longitude)
+        val marker: Marker = googleMap.addMarker(MarkerOptions().position(firstLocation))
+        MarkerAnimation.animateMarkerToGB(marker, toLocation, LatLngInterpolator.Spherical())
+    }
 
 
     //region handlePermission
@@ -213,6 +247,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
 
 //    endregion
 
+    //    region ترسیم شکل
     private fun setPolyLine() {
         googleMap.addMarker(MarkerOptions().position(LatLng(35.686136831341635, 51.410141587257385)))
         googleMap.addMarker(MarkerOptions().position(LatLng(33.48376889821861, 48.35339426994324)))
@@ -267,6 +302,32 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
                 .strokeColor(Color.BLACK)
                 .fillColor(Color.TRANSPARENT)
         )
+    }
+//endregion
+
+
+    private fun getCamera() {
+        val simple =
+            CameraUpdateFactory.newLatLngZoom(LatLng(35.684993353356006, 51.41000412404537), 20f)
+        // gMap.moveCamera(simple);
+        googleMap.animateCamera(simple)
+    }
+
+
+
+
+    private fun setGroundOverLay() {
+        val newarkLatLng = LatLng(40.714086, -74.228697)
+        val newarkBounds = LatLngBounds(
+            LatLng(40.712216, -74.22655),  // South west corner
+            LatLng(40.773941, -74.12544)
+        ) ///  North east corner
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(40.714086, -74.228697), 10f))
+        val goOption = GroundOverlayOptions()
+            .image(BitmapDescriptorFactory.fromResource(R.drawable.newark_nj_1922))
+            .clickable(true)
+            .positionFromBounds(newarkBounds)
+        googleMap.addGroundOverlay(goOption)
     }
 
 
