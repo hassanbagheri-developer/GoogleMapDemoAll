@@ -3,6 +3,7 @@ package com.example.googlemapdemoall
 import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.location.Geocoder
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
@@ -20,6 +21,7 @@ import com.google.android.gms.maps.model.*
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.toast
+import java.io.IOException
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuItemClickListener,
     OnPoiClickListener,
@@ -43,7 +45,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
         }
 
 
-
     }
 
     //    region config Google Map
@@ -55,8 +56,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
 
 //        باز شدن نقشه در لوکیشن خاص
         val latLng = LatLng(35.689927429417054, 51.311302185058594)
-        googleMap.addMarker(MarkerOptions().title("فرودگاه مهرآباد").position(latLng))
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15F))
+//        googleMap.addMarker(MarkerOptions().title("فرودگاه مهرآباد").position(latLng))
+//        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15F))
 
 //        config baraye map
         val option = GoogleMapOptions()
@@ -95,27 +96,46 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
         setCircle()
         //endregion
 
-        setGroundOverLay()
+//        setGroundOverLay()
 
-        getCamera()
+//        getCamera()
 
-        googleMap.setOnMapLongClickListener{ latLng ->
-             getCamera()
-            // goLocByLatLng(latLng);
+        googleMap.setOnMapLongClickListener {
+            getCamera()
+             goLocByLatLng(it);
             //  goLocByName();
             // DialogTrack(latLng);
 //            DistanceTo(latLng)
         }
 
-        googleMap.setOnCameraMoveListener {
-            val lat: Double = googleMap.getCameraPosition().target.latitude
-            val lng: Double = googleMap.getCameraPosition().target.longitude
-            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom( LatLng(lat,lng),20f));
-            googleMap.clear();
-            markerAnimation(LatLng(lat,lng));
 
-            //     setDirectaion(prev,new LatLng(lat,lng));
-            //     prev=new LatLng(lat,lng);
+        googleMap.moveCamera(
+            CameraUpdateFactory.newLatLngZoom(
+                 LatLng (35.684993353356006,
+                51.41000412404537
+            ), 20f
+        ));
+        var prev = LatLng(35.684993353356006, 51.41000412404537)
+        googleMap.addMarker(
+            MarkerOptions()
+                .position(prev)
+        )
+
+        setDirectaion(prev, prev)
+
+
+        googleMap.setOnCameraMoveListener {
+            val lat = googleMap.cameraPosition.target
+            val lng = googleMap.cameraPosition.target.longitude
+//            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 10f));
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lat, 20f));
+            Log.e("hassan", "$lat , $lng")
+//            googleMap.clear();
+//            markerAnimation(lat);
+
+            setDirectaion(prev, lat);
+            prev =  lat
+
         }
 
 
@@ -123,6 +143,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
     //endregion
 
 
+    //    region تغییر لوکیشن با انیمیشن
     private fun markerAnimation(latLng: LatLng) {
         val firstLocation = LatLng(35.684993353356006, 51.41000412404537)
         val toLocation = LatLng(latLng.latitude, latLng.longitude)
@@ -130,6 +151,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
         val markerAnimation = MarkerAnimation()
         markerAnimation.animateMarkerToGB(marker, toLocation, LatLngInterpolator.Spherical())
     }
+//    endregion
 
 
     //region handlePermission
@@ -139,10 +161,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            Log.e("hassan","true")
+            Log.e("hassan", "true")
             googleMap.setMyLocationEnabled(true)
         } else {
-            Log.e("hassan","false")
+            Log.e("hassan", "false")
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
@@ -152,7 +174,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String?>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String?>,
+        grantResults: IntArray
+    ) {
         if (requestCode == Constant.LOCATION_PERMISSION) {
             if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 handlePermission()
@@ -173,7 +199,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
         market.position(postion).title(name).snippet("این لوکیشن خاصی است")
         googleMap.clear()
         googleMap.setOnInfoWindowClickListener(this)
-        googleMap.addMarker(market)
+//        googleMap.addMarker(market)
     }
 
     override fun onInfoWindowClick(marker: Marker) {
@@ -250,7 +276,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
 
     //    region ترسیم شکل
     private fun setPolyLine() {
-        googleMap.addMarker(MarkerOptions().position(LatLng(35.686136831341635, 51.410141587257385)))
+        googleMap.addMarker(
+            MarkerOptions().position(
+                LatLng(
+                    35.686136831341635,
+                    51.410141587257385
+                )
+            )
+        )
         googleMap.addMarker(MarkerOptions().position(LatLng(33.48376889821861, 48.35339426994324)))
 
         //    gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(35.686136831341635,51.410141587257385),16f));
@@ -314,9 +347,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
         googleMap.animateCamera(simple)
     }
 
-
-
-
+    //  region گذاشتن عکس رو نقشه
     private fun setGroundOverLay() {
         val newarkLatLng = LatLng(40.714086, -74.228697)
         val newarkBounds = LatLngBounds(
@@ -330,9 +361,43 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
             .positionFromBounds(newarkBounds)
         googleMap.addGroundOverlay(goOption)
     }
+//endregion
+
+    //    region کشیدن خط با جابجایی خط
+    private fun setDirectaion(preLatLng: LatLng, latLng: LatLng) {
+        val polyline: Polyline = googleMap.addPolyline(
+            PolylineOptions()
+                .add(preLatLng, latLng)
+                .width(10f)
+                .color(Color.BLACK)
+        )
+    }
+//    endregion
+
+    private fun goLocByLatLng(latLng: LatLng) {
+        val geocoder = Geocoder(this)
+        try {
+            val list =
+                geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1)
+            val address = list[0]
+            val lat = address.latitude
+            val lng = address.longitude
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lat, lng), 10f))
+            googleMap.addMarker(
+                MarkerOptions()
+                    .title(address.featureName).position(LatLng(lat, lng))
+
+            )
+            toast(address.featureName.toString())
+        } catch (e: IOException) {
+            e.printStackTrace()
+            Toast.makeText(this, "" + e.message, Toast.LENGTH_SHORT).show()
+            Log.e("hassan",e.toString())
+        }
+    }
 
 
-    override fun onPoiClick(p0 : PointOfInterest) {
+    override fun onPoiClick(p0: PointOfInterest) {
         Log.e("hassan", "onPoiClick: " + p0.latLng)
         Log.e("hassan", "onPoiClick: " + p0.name)
         Log.e("hassan", "onPoiClick: " + p0.placeId)
@@ -340,7 +405,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
 
         googleMap.setOnMapClickListener {
             Log.e("hassan", it.toString())
-            addmarket(p0.name, it)
+//            addmarket(p0.name, it)
         }
     }
 
