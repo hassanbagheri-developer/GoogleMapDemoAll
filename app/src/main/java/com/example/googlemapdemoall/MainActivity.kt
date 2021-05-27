@@ -337,7 +337,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
                 .fillColor(Color.TRANSPARENT)
         )
     }
-//endregion
+//endregion  
 
 
     private fun getCamera() {
