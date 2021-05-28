@@ -8,6 +8,7 @@ class Constant {
         R.drawable.icon_car,
         R.drawable.icon_caffe_break,
         R.drawable.icon_bus
+
     )
     companion object{
         val LOCATION_PERMISSION = 222
