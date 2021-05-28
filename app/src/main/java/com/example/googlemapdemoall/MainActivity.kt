@@ -1,9 +1,12 @@
 package com.example.googlemapdemoall
 
 import android.Manifest
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Geocoder
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
@@ -15,6 +18,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.example.googlemapdemoall.litemode.LiteModeActivity
+import com.example.googlemapdemoall.location.noMap.GPSTracker
+import com.example.googlemapdemoall.location.noMap.LocationNoMap
 import com.example.googlemapdemoall.util.LatLngInterpolator
 import com.example.googlemapdemoall.util.MarkerAnimation
 import com.google.android.gms.maps.*
@@ -36,6 +41,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val gpsTracker=GPSTracker
+
+
 
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.main_map) as SupportMapFragment?
@@ -48,6 +56,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
 
 
     }
+
+
+    private lateinit var source: LatLng
+    private lateinit var destination:LatLng
+
 
     //    region config Google Map
     override fun onMapReady(p0: GoogleMap) {
@@ -103,10 +116,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
 //        getCamera()
 
         googleMap.setOnMapLongClickListener {
-            getCamera()
+//            getCamera()
 //             goLocByLatLng(it);
-              goLocByName();
-            // DialogTrack(latLng);
+//              goLocByName();
+             DialogTrack(it);
 //            DistanceTo(latLng)
         }
 
@@ -135,7 +148,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
 //            googleMap.clear();
 //            markerAnimation(lat);
 
-            setDirectaion(prev, lat);
+//            setDirectaion(prev, lat);
             prev =  lat
 
         }
@@ -228,6 +241,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
             }
             R.id.item_liteMode -> {
                 startActivity<LiteModeActivity>()
+                true
+            }
+
+            R.id.item_location_no_map -> {
+                startActivity<LocationNoMap>()
                 true
             }
             else -> false
@@ -449,6 +467,57 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
     }
 //endregion
 //    endregion
+
+
+    //    region مسیریابی درنقشه
+    private fun DialogTrack(latLng: LatLng) {
+        val values = arrayOf("Source", "Destination")
+        val builder =
+            AlertDialog.Builder(this)
+        builder.setTitle("Select Source and Destination:")
+        builder.setSingleChoiceItems(
+            values, -1
+        ) { dialog, item ->
+            when (item) {
+                0 -> {
+                    source = latLng
+//                    dialog.dismiss()
+                }
+                1 -> destination = latLng
+            }
+        }.setPositiveButton(
+            "Start Track"
+        ) { dialog, which ->
+            Log.e("hassan", "source: $source")
+            Log.e("hassan", "destination: $destination")
+            DisplayTrack(source, destination)
+        }
+        builder.show()
+    }
+
+    private fun DisplayTrack(source: LatLng, destination: LatLng) {
+        val tempSource = "" + source.latitude + "," + source.longitude
+        val tempDestination = "" + destination.latitude + "," + destination.longitude
+        Log.e("hassan", "tempSource: $tempSource")
+        Log.e("hassan", "tempDestination: $tempDestination")
+        try {
+
+            Log.e("hassan2","https://www.google.co.in/maps/dir/$tempSource/$tempDestination")
+            val uri =
+                Uri.parse("https://www.google.co.in/maps/dir/$tempSource/$tempDestination")
+            val intent = Intent(Intent.ACTION_VIEW, uri)
+            intent.setPackage("com.google.android.apps.maps")
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            startActivity(intent)
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(
+                this,
+                "You must install GoogleMap Application in your Phone." + e.message,
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+//endregion
 
 
     override fun onPoiClick(p0: PointOfInterest) {
