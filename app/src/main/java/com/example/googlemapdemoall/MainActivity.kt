@@ -7,6 +7,8 @@ import android.location.Geocoder
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
+import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -102,8 +104,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
 
         googleMap.setOnMapLongClickListener {
             getCamera()
-             goLocByLatLng(it);
-            //  goLocByName();
+//             goLocByLatLng(it);
+              goLocByName();
             // DialogTrack(latLng);
 //            DistanceTo(latLng)
         }
@@ -128,7 +130,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
             val lat = googleMap.cameraPosition.target
             val lng = googleMap.cameraPosition.target.longitude
 //            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 10f));
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lat, 20f));
+//            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lat, 20f));
             Log.e("hassan", "$lat , $lng")
 //            googleMap.clear();
 //            markerAnimation(lat);
@@ -374,6 +376,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
     }
 //    endregion
 
+    //region تبدیل نام مکان به موقعیت و بالعکس
+    //    region تبدیل مختصات به اسم مکان
     private fun goLocByLatLng(latLng: LatLng) {
         val geocoder = Geocoder(this)
         try {
@@ -395,6 +399,56 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
             Log.e("hassan",e.toString())
         }
     }
+//endregion
+
+
+    //    region تبدیل نام مکان به لوکیشن
+    private fun goLocByName() {
+        val builder =
+            AlertDialog.Builder(this)
+        builder.setTitle("Search Location")
+        builder.setMessage("Enter Location Name:")
+        val input = EditText(this@MainActivity)
+        val lp = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT
+        )
+        input.layoutParams = lp
+        builder.setView(input)
+        builder.setPositiveButton(
+            "Find Place"
+        ) { dialog, which ->
+            val nameLoc = input.text.toString()
+            if (nameLoc != "") {
+                val geocoder = Geocoder(this@MainActivity)
+                try {
+                    val list =
+                        geocoder.getFromLocationName(nameLoc, 1)
+                    val address = list[0]
+                    val lat = address.latitude
+                    val lng = address.longitude
+                    googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lat, lng), 10f))
+                    googleMap.addMarker(
+                        MarkerOptions()
+                            .title(address.featureName).position(LatLng(lat, lng))
+                    )
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                    Toast.makeText(this@MainActivity, "" + e.message, Toast.LENGTH_SHORT).show()
+                } catch (e: IndexOutOfBoundsException) {
+                    Toast.makeText(
+                        this@MainActivity,
+                        "" + "wrong characters!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            } else {
+                Toast.makeText(this@MainActivity, "Empty LocName", Toast.LENGTH_SHORT).show()
+            }
+        }
+        builder.show()
+    }
+//endregion
+//    endregion
 
 
     override fun onPoiClick(p0: PointOfInterest) {
