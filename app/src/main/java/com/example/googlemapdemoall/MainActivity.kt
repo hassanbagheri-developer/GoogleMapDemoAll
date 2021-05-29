@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Geocoder
+import android.location.Location
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -18,6 +19,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.example.googlemapdemoall.litemode.LiteModeActivity
+import com.example.googlemapdemoall.location.Map.LocationWithMap
 import com.example.googlemapdemoall.location.noMap.GPSTracker
 import com.example.googlemapdemoall.location.noMap.LocationNoMap
 import com.example.googlemapdemoall.util.LatLngInterpolator
@@ -35,6 +37,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
     OnInfoWindowClickListener {
 
     private lateinit var googleMap: GoogleMap
+
+    var location1 = Location("loc1")
+    var location2 = Location("loc2")
+    var distance = 0f
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -119,9 +125,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
 //            getCamera()
 //             goLocByLatLng(it);
 //              goLocByName();
-             DialogTrack(it);
-//            DistanceTo(latLng)
+//             DialogTrack(it);
+            DistanceTo(it)
         }
+
+
+
 
 
         googleMap.moveCamera(
@@ -156,6 +165,49 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
 
     }
     //endregion
+
+
+    //    region فاصله دو نقطه
+    private fun DistanceTo(latLng: LatLng) {
+        val values = arrayOf("Location 1", "Location 2")
+        val builder =
+            AlertDialog.Builder(this)
+        builder.setTitle("Select Your Location :")
+        builder.setSingleChoiceItems(
+            values, -1
+        ) { dialog, item ->
+            when (item) {
+                0 -> {
+                    location1.setLatitude(latLng.latitude)
+                    location1.setLongitude(latLng.longitude)
+                    dialog.dismiss()
+                }
+                1 -> {
+                    location2.setLatitude(latLng.latitude)
+                    location2.setLongitude(latLng.longitude)
+                }
+            }
+        }.setPositiveButton(
+            "Calculate"
+        ) { dialog, which ->
+//            distance = location2.distanceTo(location1) / 1000
+            distance = location2.distanceTo(location1)
+            Log.e("hassan88","$location2")
+            Log.e("hassan88","$location1")
+            Log.e("hassan88",distance.toString())
+
+
+            val showDistance =
+                AlertDialog.Builder(this@MainActivity)
+            showDistance.setTitle("Result")
+            showDistance.setMessage("Distance is: " + distance + "m")
+            showDistance.show()
+        }
+        builder.show()
+    }
+
+//    endregion
+
 
 
     //    region تغییر لوکیشن با انیمیشن
@@ -246,6 +298,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, PopupMenu.OnMenuIt
 
             R.id.item_location_no_map -> {
                 startActivity<LocationNoMap>()
+                true
+            }
+
+            R.id.item_location_with_map -> {
+                startActivity<LocationWithMap>()
                 true
             }
             else -> false

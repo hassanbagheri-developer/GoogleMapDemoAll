@@ -36,7 +36,7 @@
     <item
         android:title="LocationNoMap"
         android:id="@+id/item_location_no_map"/>
-<!--    <item-->
-<!--        android:title="LocationWithMap"-->
-<!--        android:id="@+id/item_location_with_map"/>-->
+    <item
+        android:title="LocationWithMap"
+        android:id="@+id/item_location_with_map"/>
 </menu>

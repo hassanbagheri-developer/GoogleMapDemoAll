@@ -17,6 +17,7 @@
         android:theme="@style/Theme.GoogleMapDemoAll">
         <activity android:name=".litemode.LiteModeActivity"/>
         <activity android:name=".location.noMap.LocationNoMap"/>
+        <activity android:name=".location.Map.LocationWithMap"/>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
