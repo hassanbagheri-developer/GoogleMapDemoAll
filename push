@@ -1,0 +1,7 @@
+#!/bin/bash
+echo plese ente commit : 
+read description
+echo $description
+git add .
+git commit -am "$description"
+git push origin
